@@ -8,7 +8,8 @@ struct rdnode{
 	int value;
 	int isroot;
 	int axis;
-	struct rfnode* point;
+	struct rfnode* left;
+	struct rfnode* right;
 };
 
 
@@ -80,23 +81,25 @@ void rdtree(int* x,int*y,int*z,int dimension){
 int rounds = 3;
 char axis='x';
 int i=0;
+struct rdnode* tmp;
+struct rdnode* central;
 
 while(i<rounds){
-	if(axis=='x'){
+	
+		tmp = (struct rdnode*)malloc(sizeof(struct rdnode));
+		tmp->value = axismediana(x,dimension);
+		tmp->axis = axis;
+		tmp->left=NULL;
+		tmp->right=NULL;
+		printf("%d\n",tmp->value );
+		if(i==0){
+			tmp->isroot=1;
+		}
 
-	}
-	if(axis=='y'){
+		//circular até ter o nivel necessário consoante o eixo, acrescentar o valor da mediana
+	
 
-	}
-	if(axis=='z'){
-		
-	}
-
-
-
-
-
-
+	i++;
 }
 
 
