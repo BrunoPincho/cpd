@@ -4,13 +4,18 @@
 
 
 
-struct rdnode{
+struct rdnode {
 	int value;
 	int isroot;
 	int axis;
-	struct rfnode* left;
-	struct rfnode* right;
+	int depth;
+	struct rdnode* left;
+	struct rdnode* right;
 };
+
+int* x;
+int* y;
+int* z;
 
 
 void Merge(int *A,int *L,int leftCount,int *R,int rightCount) {
@@ -52,20 +57,23 @@ void MergeSort(int *A,int n) {
 }
 
 
-int axismediana(int* x,int size){
+int axismediana(int* x,int size,int oddoreven){
 	int half;
 	int holddiv;
+	
 
-	if(size%2==0){
-		return x[size/2];
+	if(oddoreven==0){
+		return x[size];
 
 	}else{
 
-		holddiv = (x[size/2]+x[size/2+1])*0.5;
+		holddiv = (x[size]+x[size+1])*0.5;
 		return holddiv;
 	}
 	return 0;
 }
+
+
 
 char counter(char l){
 
@@ -77,51 +85,63 @@ char counter(char l){
 	return 'x';
 }
 
-void rdtree(int* x,int*y,int*z,int dimension){
-int rounds = 3;
-char axis='x';
-int i=0;
-struct rdnode* tmp;
-struct rdnode* central;
+struct rdnode* create(int *vect,int offset,char axis,int depth,int oddoreven,int end){
+		int odd;
+		char eixo = counter(axis);
 
-while(i<rounds){
-	
-		tmp = (struct rdnode*)malloc(sizeof(struct rdnode));
-		tmp->value = axismediana(x,dimension);
-		tmp->axis = axis;
-		tmp->left=NULL;
-		tmp->right=NULL;
-		printf("%d\n",tmp->value );
-		if(i==0){
-			tmp->isroot=1;
+		//a amostra inicial tem de ter logo um calculozito de par ou impar
+
+		if(offset == 1 || offset == end)return NULL;
+
+		struct rdnode* tmp = (struct rdnode*)malloc(sizeof(struct rdnode));
+		if(depth==0){
+			offset=end/2;
 		}
 
-		//circular até ter o nivel necessário consoante o eixo, acrescentar o valor da mediana
-	
 
-	i++;
-}
+		tmp->depth = depth;
+		tmp->value = axismediana(vect,offset,oddoreven);
+
+		depth++;
+
+		if(offset%2!=0)odd=1;
+
+		if(eixo == 'x'){
+			tmp->left = create(x,offset/2,eixo,depth,odd,offset);
+		}else if(eixo == 'y'){
+			tmp->left = create(y,offset/2,eixo,depth,odd,offset);
+		}else if(eixo == 'z'){
+			tmp->left = create(z,offset/2,eixo,depth,odd,offset);
+		}
+		odd=0;
+		
+
+		if(offset%2!=0)odd=1;
+		if(depth==0){
+			offset = offset+(end-offset)/2;
+		}
+		tmp->right = create(y,offset,eixo,depth,odd,end);
 
 
 
 
-
-
-
-
+		return tmp;
 }
 
 
 int main(int argc,char*argv[]){
 	FILE* f;
 	int count=0;
-	int* x;
-	int* y;
-	int* z;
+	
 	int a,b,c,d;
 	char buff[10];
 	printf("%s \n",argv[1]);
 	f = fopen(argv[1],"r");
+	struct rdnode* root;
+
+	{
+		
+	};
 
 	while(fgets(buff,sizeof(buff),f)!=NULL){
 		//fgets(buff,10,f);
@@ -162,10 +182,10 @@ int main(int argc,char*argv[]){
 		for(d=0;d<=count-1;d++){
 			printf("%d %d %d\n",x[d],y[d],z[d]);
 		}
-		printf("\n mediana de x %d \n",axismediana(x,count));
+		/*printf("\n mediana de x %d \n",axismediana(x,count));
 		printf("\n mediana de y %d \n",axismediana(y,count));
-		printf("\n mediana de z %d \n",axismediana(z,count));
-		rdtree(x,y,z,d);
+		printf("\n mediana de z %d \n",axismediana(z,count));*/
+		//root = create(x,d,d,'x',0);
 
 		fclose(f);
 
