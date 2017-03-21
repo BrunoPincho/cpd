@@ -7,7 +7,7 @@
 struct rdnode {
 	int value;
 	int isroot;
-	int axis;
+	char axis;
 	int depth;
 	struct rdnode* left;
 	struct rdnode* right;
@@ -17,6 +17,7 @@ int* x;
 int* y;
 int* z;
 
+struct rdnode* root;
 
 void Merge(int *A,int *L,int leftCount,int *R,int rightCount) {
 	int i,j,k;
@@ -60,23 +61,46 @@ void MergeSort(int *A,int n) {
 int axismediana(int* x,int size,int oddoreven){
 	int half;
 	int holddiv;
-	
 
 	if(oddoreven==0){
 		return x[size];
 
 	}else{
-
 		holddiv = (x[size]+x[size+1])*0.5;
 		return holddiv;
 	}
 	return 0;
 }
 
+int medianaintervalo(int* x,int begin,int end){
+	int half;
+	int holddiv;
+
+	if((end)%2==0){
+		return x[(end-begin)/2+begin];
+
+	}else{
+		holddiv = (x[(end-begin)/2+begin]+x[(end-begin)/2+begin+1])*0.5;
+		return holddiv;
+	}
+	return 0;
+}
+
+int indexmediana(int begin,int end){
+	int holddiv;
+
+	if((end)%2==0){
+		return (end-begin)/2+begin;
+
+	}else{
+		holddiv = (end)*0.5;
+		return holddiv;
+	}
+
+}
 
 
 char counter(char l){
-
 	switch (l){
 		case('x'):{return 'y';};
 		case ('y'):{return 'z';};
@@ -85,43 +109,55 @@ char counter(char l){
 	return 'x';
 }
 
-struct rdnode* create(int *vect,int offset,char axis,int depth,int oddoreven,int end){
+struct rdnode* create(int *vect,char axis,int depth,int begin,int end){
 		int odd;
-		char eixo = counter(axis);
-
+		int newoffset;
+		
+		
 		//a amostra inicial tem de ter logo um calculozito de par ou impar
 
-		if(offset == 1 || offset == end)return NULL;
-
 		struct rdnode* tmp = (struct rdnode*)malloc(sizeof(struct rdnode));
-		if(depth==0){
-			offset=end/2;
-		}
-
-
+		
 		tmp->depth = depth;
-		tmp->value = axismediana(vect,offset,oddoreven);
+		tmp->value = medianaintervalo(vect,begin,end);
+		tmp->axis = axis;
+		tmp->left=NULL;
+		tmp->right=NULL;
+
+		if(end-begin<=1){
+			return tmp;
+		}
+		//if(offset == 1 || offset == end || (end-offset)<=1 )return tmp;
+
+		char eixo = counter(axis);
 
 		depth++;
 
-		if(offset%2!=0)odd=1;
-
 		if(eixo == 'x'){
-			tmp->left = create(x,offset/2,eixo,depth,odd,offset);
+			tmp->left = create(x,eixo,depth,begin,indexmediana(begin,end));
 		}else if(eixo == 'y'){
-			tmp->left = create(y,offset/2,eixo,depth,odd,offset);
+			tmp->left = create(y,eixo,depth,begin,indexmediana(begin,end));
 		}else if(eixo == 'z'){
-			tmp->left = create(z,offset/2,eixo,depth,odd,offset);
+			tmp->left = create(z,eixo,depth,begin,indexmediana(begin,end));
 		}
-		odd=0;
+		//odd=0;
 		
 
-		if(offset%2!=0)odd=1;
-		if(depth==0){
-			offset = offset+(end-offset)/2;
-		}
-		tmp->right = create(y,offset,eixo,depth,odd,end);
+		
+		
+		/*offset = offset+(end-offset)/2;
+		if(offset%2!=0){
+			offset += 1;
+			odd=1;
+		}*/
 
+		if(eixo=='x'){
+			tmp->right = create(x,eixo,depth,indexmediana(begin,end)+1,end);
+		}else if(eixo=='y'){
+			tmp->right = create(y,eixo,depth,indexmediana(begin,end)+1,end);
+		}else if(eixo=='z'){
+			tmp->right = create(z,eixo,depth,indexmediana(begin,end)+1,end);
+		}
 
 
 
@@ -132,42 +168,33 @@ struct rdnode* create(int *vect,int offset,char axis,int depth,int oddoreven,int
 int main(int argc,char*argv[]){
 	FILE* f;
 	int count=0;
-	
-	int a,b,c,d;
+	int odd;
+	int a,b,c,d,i;
 	char buff[10];
-	printf("%s \n",argv[1]);
-	f = fopen(argv[1],"r");
-	struct rdnode* root;
+	//printf("%s \n",argv[1]);
+	f = fopen("sample.txt","r");
+	
 
-	{
-		
-	};
+	
 
-	while(fgets(buff,sizeof(buff),f)!=NULL){
-		//fgets(buff,10,f);
-	/*	if(count==0){
-			fscanf(f,"%d",&d);
-		}else{
-			fscanf(f,"%d %d %d",&a,&b,&c);
-		}*/
-		count++;
-		//printf("%d %d %d\n",a,b,c);
-		
-
+	while(fgets(buff,sizeof(buff),f)!=NULL){		
+		count++;		
 	}
 
-	x = (int *)malloc(count*sizeof(int));
-	y = (int *)malloc(count*sizeof(int));
-	z = (int *)malloc(count*sizeof(int));
-	
+	memset(buff,'\0',10);
+
+	x = (int *)malloc((count-1)*sizeof(int));
+	y = (int *)malloc((count-1)*sizeof(int));
+	z = (int *)malloc((count-1)*sizeof(int));
+	x[0]=y[0]=z[0]=0;
 	rewind(f);
 	count = 0;
-	while(fgets(buff,10,f)!=NULL){
+	while(fgets(buff,10,f)!= NULL){
 	
 		if(count==0){
-			fscanf(f,"%d",&d);
+			sscanf(buff,"%d",&d);
 		}else{
-			fscanf(f,"%d %d %d",&x[count],&y[count],&z[count]);
+			sscanf(buff,"%d %d %d",&x[count-1],&y[count-1],&z[count-1]);
 		}
 		
 		
@@ -176,17 +203,26 @@ int main(int argc,char*argv[]){
 		count++;
 	}
 
-		MergeSort(x,count);
-		MergeSort(y,count);
-		MergeSort(z,count);
-		for(d=0;d<=count-1;d++){
+		for(d=0;d<count-1;d++){
 			printf("%d %d %d\n",x[d],y[d],z[d]);
+		}
+		printf("\n");
+
+		MergeSort(x,count-1);
+		MergeSort(y,count-1);
+		MergeSort(z,count-1);
+		for(i=0;i<count-1;i++){
+			printf("%d %d %d\n",x[i],y[i],z[i]);
 		}
 		/*printf("\n mediana de x %d \n",axismediana(x,count));
 		printf("\n mediana de y %d \n",axismediana(y,count));
 		printf("\n mediana de z %d \n",axismediana(z,count));*/
-		//root = create(x,d,d,'x',0);
-
+		if((count-1)%2==0){
+			odd=0;
+		}else{
+			odd=1;
+		}
+		root = create(x,'x',0,0,count-2);
 		fclose(f);
 
 	return 0;
