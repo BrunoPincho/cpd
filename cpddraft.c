@@ -16,6 +16,7 @@ struct rdnode {
 int* x;
 int* y;
 int* z;
+int size;
 
 struct rdnode* root;
 
@@ -109,9 +110,21 @@ char counter(char l){
 	return 'x';
 }
 
+struct rdnode*LFN(struct rdnode* node){
+
+	if(node->left==NULL){
+		return node;
+	}else{
+		LFN(node->left);
+	}
+
+}
+
 struct rdnode* create(int *vect,char axis,int depth,int begin,int end){
 		int odd;
 		int newoffset;
+
+		struct rdnode* colisionsolver;
 		
 		
 		//a amostra inicial tem de ter logo um calculozito de par ou impar
@@ -124,7 +137,11 @@ struct rdnode* create(int *vect,char axis,int depth,int begin,int end){
 		tmp->left=NULL;
 		tmp->right=NULL;
 
-		if(end-begin<=1){
+		/*if(end-begin<=1){
+			return tmp;
+		}*/
+
+		if(depth == 10){
 			return tmp;
 		}
 		//if(offset == 1 || offset == end || (end-offset)<=1 )return tmp;
@@ -160,6 +177,12 @@ struct rdnode* create(int *vect,char axis,int depth,int begin,int end){
 		}
 
 
+		//tentar resolver os nodos duplicados
+		/*if(((tmp->right)->value)==((tmp->left)->value)){
+			colisionsolver = LFN(tmp->right);
+			colisionsolver->left = tmp->left;
+			tmp->left = NULL;
+		}*/
 
 		return tmp;
 }
@@ -172,8 +195,9 @@ int main(int argc,char*argv[]){
 	int a,b,c,d,i;
 	char buff[10];
 	//printf("%s \n",argv[1]);
-	f = fopen("sample.txt","r");
-	
+	f = fopen("s20e400.in","r");
+	//f = fopen("sample.txt","r");
+		
 
 	
 
@@ -197,8 +221,6 @@ int main(int argc,char*argv[]){
 			sscanf(buff,"%d %d %d",&x[count-1],&y[count-1],&z[count-1]);
 		}
 		
-		
-
 		//printf("%d %d %d\n",x[count],y[count],z[count]);
 		count++;
 	}
@@ -214,14 +236,17 @@ int main(int argc,char*argv[]){
 		for(i=0;i<count-1;i++){
 			printf("%d %d %d\n",x[i],y[i],z[i]);
 		}
+
 		/*printf("\n mediana de x %d \n",axismediana(x,count));
 		printf("\n mediana de y %d \n",axismediana(y,count));
 		printf("\n mediana de z %d \n",axismediana(z,count));*/
+
 		if((count-1)%2==0){
 			odd=0;
 		}else{
 			odd=1;
 		}
+		size = d;
 		root = create(x,'x',0,0,count-2);
 		fclose(f);
 
